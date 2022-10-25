@@ -54,3 +54,22 @@ jobs:
         mkdir builddir && cd builddir
         eatmydata cmake -DBUILD_GUI=1 ..
         eatmydata make
+        cd .. && eatmydata rm -rf builddir
+    - name: Fetch upstream tarball and build Debian package
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        set -e
+        set -x
+        eatmydata apt --yes --quiet build-dep --indep-only .
+        eatmydata apt --yes --quiet install libdpkg-perl libgit-wrapper-perl liblist-compare-perl libstring-shellquote-perl libtry-tiny-perl
+        eatmydata git-deborig --version=1.2.0+git
+        eatmydata debuild -us -uc
+        eatmydata make
+    - name: Install Debian package
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        set -e
+        set -x
+        eatmydata apt --yes --quiet install ./*.deb
